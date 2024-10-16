@@ -70,7 +70,7 @@ export const PlayingStage = () => {
         >
           <div className={`flip-card-inner ${card.opened ? "opened" : ""}`}>
             <div
-              className="flip-card-front rounded-md grid place-items-center select-none"
+              className="flip-card-front rounded-md grid place-items-center select-none hover:scale-105 transition-all"
               style={{
                 backgroundImage: "url(/images/option-1.svg)",
                 backgroundRepeat: "no-repeat",
