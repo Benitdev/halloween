@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* The flip card container - set the width and height to whatever you want. We have added the border property to demonstrate that the flip itself goes out of the box on hover (remove perspective if you don't want the 3D effect */
+  .flip-card {
+    background-color: transparent;
+    perspective: 1000px; /* Remove this if you don't want the 3D effect */
+  }
+
+  /* This container is needed to position the front and back side */
+  .flip-card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+  }
+
+  /* Do an horizontal flip when you move the mouse over the flip box container */
+  .flip-card .flip-card-inner.opened {
+    transform: rotateY(180deg);
+  }
+
+  /* Position the front and back side */
+  .flip-card-front,
+  .flip-card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden; /* Safari */
+    backface-visibility: hidden;
+  }
+
+  /* Style the front side (fallback if image is missing) */
+  .flip-card-front {
+    background-color: #bbb;
+    color: black;
+  }
+
+  /* Style the back side */
+  .flip-card-back {
+    color: white;
+    transform: rotateY(180deg);
+  }
+
+  /* .flip-card:before {
+    position: absolute;
+    content: "";
+    top: -0.1rem;
+    left: -0.1rem;
+    background: linear-gradient(51deg, #f490ff, #be0786, #4eafff, #700099);
+    z-index: -1;
+    width: calc(100% + 0.2rem);
+    height: calc(100% + 0.2rem);
+    border-radius: 6px;
+    animation: gradient 5s ease infinite;
+    background-size: 350% 350% !important;
+    box-shadow: 0 8px 12px #4eafff88;
+    transition: 0.5s ease-in-out;
+  } */
+
+  .card:hover:before {
+    animation: gradient 5s ease infinite;
+  }
+
+  @keyframes gradient {
+    0% {
+      background-position: 0% 50%;
+      box-shadow: 0px 0px 15px #4eafff;
+    }
+
+    50% {
+      background-position: 100% 50%;
+      box-shadow: 0 0px 10px #4eafff;
+    }
+
+    100% {
+      background-position: 0% 50%;
+      box-shadow: 0px 0px 20px #4eafff;
+    }
+  }
+}
+
+@keyframes flicker {
+  0%,
+  6%,
+  12% {
+    text-shadow: none;
+    color: #111111;
+  }
+  3%,
+  9% {
+    text-shadow: 0 0 8px rgba(250, 103, 1, 0.6);
+    color: #01fa69;
+  }
+  60% {
+    text-shadow: 0 0 8px rgba(250, 103, 1, 0.6), 0 0 16px rgba(250, 103, 1, 0.4),
+      0 0 20px rgba(255, 0, 84, 0.2), 0 0 22px rgba(255, 0, 84, 0.1);
+    color: #01fa69;
+  }
+  100% {
+    text-shadow: 0 0 8px rgba(250, 103, 1, 0.6), 0 0 16px rgba(250, 103, 1, 0.4),
+      0 0 20px rgba(255, 0, 84, 0.2), 0 0 22px rgba(255, 0, 84, 0.1);
+    color: #01fa69;
+  }
+}
