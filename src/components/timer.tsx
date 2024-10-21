@@ -3,16 +3,18 @@ import Image from "next/image"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 
+const TIME_OUT = 45
+
 export const Timer = () => {
   const { state, setStore } = useStore()
-  const [seconds, setSeconds] = useState(60)
+  const [seconds, setSeconds] = useState(TIME_OUT)
 
   useEffect(() => {
     if (state === "started") {
       const timer = setInterval(() => setSeconds((prev) => --prev), 1000)
       return () => clearInterval(timer)
     }
-    if (state === "playing") setSeconds(60)
+    if (state === "playing") setSeconds(TIME_OUT)
   }, [state])
 
   useEffect(() => {

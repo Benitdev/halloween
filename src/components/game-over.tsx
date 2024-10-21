@@ -1,6 +1,7 @@
 import { motion } from "framer-motion"
 import { useStore } from "@/stores/root"
 import { shuffleArray } from "@/app/utils"
+import Image from "next/image"
 
 export const GameOver = () => {
   const { cards, setStore } = useStore()
@@ -22,8 +23,7 @@ export const GameOver = () => {
         }}
         className="flex flex-col items-center gap-16"
       >
-        {/* <Image src={"/images/win.svg"} alt="" width={300} height={20} /> */}
-        <div className="text-[60px]">LOSE</div>
+        <Image src={"/images/lose.svg"} alt="" width={300} height={20} />
         <motion.div
           initial={{
             y: 100,

@@ -2,6 +2,7 @@ import { shuffleArray } from "@/app/utils"
 import { useStore } from "@/stores/root"
 import React from "react"
 import { motion } from "framer-motion"
+import Image from "next/image"
 
 const StartingStage = () => {
   const { cards, setStore } = useStore()
@@ -49,6 +50,23 @@ const StartingStage = () => {
         <span className="font-eater text-2xl tracking-[4px] font-bold">
           PLAY GAME
         </span>
+      </motion.div>
+      <motion.div
+        layoutId="logo-img"
+        initial={{
+          y: 200,
+        }}
+        animate={{
+          x: "-50%",
+          y: 0,
+        }}
+        transition={{
+          duration: 2,
+          type: "spring",
+        }}
+        className="fixed bottom-[.7rem] left-1/2"
+      >
+        <Image src={"/images/logo.png"} alt="" width={250} height={70} />
       </motion.div>
     </div>
   )

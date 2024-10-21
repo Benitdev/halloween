@@ -1,12 +1,12 @@
 import { useStore } from "@/stores/root"
 import Image from "next/image"
-import { useEffect, useState } from "react"
+import { memo, useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Timer } from "@/components/timer"
 import { GameOver } from "@/components/game-over"
 import { GameWin } from "@/components/game-win"
 
-export const PlayingStage = () => {
+export const PlayingStage = memo(() => {
   const [selectedCard, setSelectedCard] = useState<{
     id: number
     img: string
@@ -14,13 +14,16 @@ export const PlayingStage = () => {
   const { state, cards, triggerCard, setStore } = useStore()
   const [missedAudioTrigger, setMissedAudioTrigger] = useState(0)
   const [matchedAudioTrigger, setMatchedAudioTrigger] = useState(0)
+  const [disabled, setDisabled] = useState(false)
 
   const handleOnCardClick = (id: number, img: string) => {
     if (state === "playing") setStore({ state: "started" })
 
     triggerCard(id)
+    setDisabled(true)
 
     if (!selectedCard) {
+      setDisabled(false)
       setSelectedCard({ id, img })
       return
     }
@@ -30,11 +33,17 @@ export const PlayingStage = () => {
       setTimeout(() => {
         triggerCard(selectedCard.id)
         triggerCard(id)
+        setDisabled(false)
       }, 500)
-    } else setMatchedAudioTrigger((prev) => ++prev)
+    } else {
+      setDisabled(false)
+      setMatchedAudioTrigger((prev) => ++prev)
+    }
 
     setSelectedCard(null)
   }
+
+  console.log(selectedCard, cards)
 
   useEffect(() => {
     if (cards.every((card) => card.opened)) setStore({ state: "win" })
@@ -47,8 +56,9 @@ export const PlayingStage = () => {
         <motion.div
           key={card.id}
           layoutId={card.id.toString()}
-          className="flip-card h-[23vh] w-[17.5vh] shadow-xl"
+          className="flip-card h-[23vh] w-[17.5vh] shadow-xl select-none"
           onClick={() => {
+            if (disabled) return
             if (card.opened || (state !== "started" && state !== "playing"))
               return
             handleOnCardClick(card.id, card.imageUrl)
@@ -70,7 +80,7 @@ export const PlayingStage = () => {
         >
           <div className={`flip-card-inner ${card.opened ? "opened" : ""}`}>
             <div
-              className="flip-card-front rounded-md grid place-items-center select-none hover:scale-105 transition-all"
+              className="flip-card-front rounded-md grid place-items-center select-none hover:scale-105 transition-transform"
               style={{
                 backgroundImage: "url(/images/option-1.svg)",
                 backgroundRepeat: "no-repeat",
@@ -99,14 +109,7 @@ export const PlayingStage = () => {
         </motion.div>
       ))}
       <motion.div
-        initial={{
-          x: 100,
-          y: -100,
-        }}
-        animate={{
-          x: 0,
-          y: 0,
-        }}
+        layoutId="logo-img"
         transition={{
           duration: 2,
           type: "spring",
@@ -136,4 +139,4 @@ export const PlayingStage = () => {
       {state === "win" && <GameWin />}
     </div>
   )
-}
+})

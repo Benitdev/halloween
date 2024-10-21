@@ -47,7 +47,7 @@ export const CARDS = [
     imageUrl: "/images/characters/Character - 5.png",
   },
   {
-    id: 50,
+    id: 10,
     opened: false,
     imageUrl: "/images/characters/Character - 5.png",
   },
@@ -57,7 +57,7 @@ export const CARDS = [
     imageUrl: "/images/characters/Character - 6.png",
   },
   {
-    id: 62,
+    id: 12,
     opened: false,
     imageUrl: "/images/characters/Character - 6.png",
   },
@@ -67,27 +67,27 @@ export const CARDS = [
     imageUrl: "/images/characters/Character - 7.png",
   },
   {
-    id: 74,
+    id: 14,
     opened: false,
     imageUrl: "/images/characters/Character - 7.png",
   },
   {
     id: 15,
     opened: false,
-    imageUrl: "/images/characters/Character - 8.png",
+    imageUrl: "/images/characters/Character - 26.png",
   },
   {
-    id: 86,
+    id: 16,
     opened: false,
-    imageUrl: "/images/characters/Character - 8.png",
+    imageUrl: "/images/characters/Character - 26.png",
   },
   {
-    id: 88,
+    id: 17,
     opened: false,
     imageUrl: "/images/characters/Character - 9.png",
   },
   {
-    id: 87,
+    id: 18,
     opened: false,
     imageUrl: "/images/characters/Character - 9.png",
   },
