@@ -10,12 +10,29 @@ const StartingStage = () => {
   return (
     <div className="flex-1 w-full grid place-items-center">
       <motion.div
+        layoutId="logo-img"
         initial={{
-          y: 100,
+          y: -200,
+        }}
+        animate={{
+          x: "-50%",
+          y: 0,
+        }}
+        transition={{
+          duration: 2,
+          type: "spring",
+        }}
+        className="fixed top-[1rem] left-1/2"
+      >
+        <Image src={"/images/logo.png"} alt="" width={250} height={70} />
+      </motion.div>
+      <motion.div
+        initial={{
+          y: 200,
           opacity: 0,
         }}
         animate={{
-          y: 0,
+          y: 100,
           opacity: 1,
           scale: [1, 1.2, 0.8, 1.2, 1],
         }}
@@ -50,23 +67,6 @@ const StartingStage = () => {
         <span className="font-eater text-2xl tracking-[4px] font-bold">
           PLAY GAME
         </span>
-      </motion.div>
-      <motion.div
-        layoutId="logo-img"
-        initial={{
-          y: 200,
-        }}
-        animate={{
-          x: "-50%",
-          y: 0,
-        }}
-        transition={{
-          duration: 2,
-          type: "spring",
-        }}
-        className="fixed bottom-[.7rem] left-1/2"
-      >
-        <Image src={"/images/logo.png"} alt="" width={250} height={70} />
       </motion.div>
     </div>
   )

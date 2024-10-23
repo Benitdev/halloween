@@ -11,7 +11,7 @@ export const PlayingStage = memo(() => {
     id: number
     img: string
   } | null>(null)
-  const { state, cards, triggerCard, setStore } = useStore()
+  const { state, sorting, cards, triggerCard, setStore } = useStore()
   const [missedAudioTrigger, setMissedAudioTrigger] = useState(0)
   const [matchedAudioTrigger, setMatchedAudioTrigger] = useState(0)
   const [disabled, setDisabled] = useState(false)
@@ -43,7 +43,14 @@ export const PlayingStage = memo(() => {
     setSelectedCard(null)
   }
 
-  console.log(selectedCard, cards)
+  useEffect(() => {
+    if (!sorting) return
+    setSelectedCard(null)
+    const timer = setTimeout(() => {
+      setStore({ sorting: false })
+    }, 4000)
+    return () => clearTimeout(timer)
+  }, [sorting])
 
   useEffect(() => {
     if (cards.every((card) => card.opened)) setStore({ state: "win" })
@@ -58,7 +65,7 @@ export const PlayingStage = memo(() => {
           layoutId={card.id.toString()}
           className="flip-card h-[23vh] w-[17.5vh] shadow-xl select-none"
           onClick={() => {
-            if (disabled) return
+            if (sorting || disabled) return
             if (card.opened || (state !== "started" && state !== "playing"))
               return
             handleOnCardClick(card.id, card.imageUrl)
@@ -75,7 +82,7 @@ export const PlayingStage = memo(() => {
           }}
           transition={{
             duration: 1,
-            delay: index * 0.15,
+            delay: index * (sorting ? 0.07 : 0.15),
           }}
         >
           <div className={`flip-card-inner ${card.opened ? "opened" : ""}`}>

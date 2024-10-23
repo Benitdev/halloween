@@ -8,6 +8,7 @@ type Store = {
     opened: boolean
     imageUrl: string
   }[]
+  sorting: boolean
   setStore: (newState: Partial<Store>) => void
   triggerCard: (id: number) => void
 }
@@ -15,6 +16,7 @@ type Store = {
 export const useStore = create<Store>((set) => ({
   state: "idle",
   cards: CARDS,
+  sorting: false,
   setStore: (newState: Partial<Store>) =>
     set((state) => ({ ...state, ...newState })),
   triggerCard: (id: number) =>

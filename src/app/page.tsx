@@ -15,7 +15,18 @@ export default function Home() {
 
   return (
     <BackgroundBeamsWithCollision>
-      <div className="absolute inset-0 bg-black/80"></div>
+      <motion.div
+        style={{
+          opacity: 0,
+        }}
+        animate={{
+          opacity: 1,
+        }}
+        transition={{
+          duration: 4,
+        }}
+        className="absolute inset-0 bg-black/80"
+      ></motion.div>
       <main className="relative h-screen flex flex-col overflow-hidden items-center w-full">
         <motion.div
           className="mt-4"
@@ -26,7 +37,7 @@ export default function Home() {
           animate={{
             opacity: 1,
             scale: state === "idle" ? 2 : 1,
-            y: state === "idle" ? 100 : -10,
+            y: state === "idle" ? 200 : -10,
             rotate: [-7, 7, -7, 7, -7],
           }}
           transition={{
@@ -39,7 +50,7 @@ export default function Home() {
           }}
         >
           <Image
-            src={"/images/game-logo.png"}
+            src={"/images/game-logo.svg"}
             alt=""
             width={350}
             height={100}

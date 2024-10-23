@@ -50,6 +50,7 @@ export const GameOver = () => {
           onClick={() =>
             setStore({
               state: "playing",
+              sorting: true,
               cards: shuffleArray(
                 cards.map((card) => ({
                   ...card,
