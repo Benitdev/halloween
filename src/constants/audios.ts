@@ -1,4 +1,5 @@
 export const AUDIOS = {
+  ["transform-to-playing"]: "game-idle.mp3",
   idle: "game-idle.mp3",
   playing: "game-idle.mp3",
   started: "game-playing.mp3",

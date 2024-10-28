@@ -48,7 +48,7 @@ export const PlayingStage = memo(() => {
     setSelectedCard(null)
     const timer = setTimeout(() => {
       setStore({ sorting: false })
-    }, 4000)
+    }, 3000)
     return () => clearTimeout(timer)
   }, [sorting])
 
@@ -87,7 +87,7 @@ export const PlayingStage = memo(() => {
         >
           <div className={`flip-card-inner ${card.opened ? "opened" : ""}`}>
             <div
-              className="flip-card-front rounded-md grid place-items-center select-none hover:scale-105 transition-transform"
+              className="flip-card-front rounded-md grid place-items-center select-none hover:scale-105 transition-transform duration-75"
               style={{
                 backgroundImage: "url(/images/option-1.svg)",
                 backgroundRepeat: "no-repeat",
@@ -120,6 +120,14 @@ export const PlayingStage = memo(() => {
         transition={{
           duration: 2,
           type: "spring",
+        }}
+        initial={{
+          x: 200,
+          y: -200,
+        }}
+        animate={{
+          x: 0,
+          y: 0,
         }}
         className="fixed top-[.7rem] right-[2rem]"
       >

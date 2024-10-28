@@ -9,7 +9,7 @@ const StartingStage = () => {
 
   return (
     <div className="flex-1 w-full grid place-items-center">
-      <motion.div
+      {/* <motion.div
         layoutId="logo-img"
         initial={{
           y: -200,
@@ -25,7 +25,7 @@ const StartingStage = () => {
         className="fixed top-[1rem] left-1/2"
       >
         <Image src={"/images/logo.png"} alt="" width={250} height={70} />
-      </motion.div>
+      </motion.div> */}
       <motion.div
         initial={{
           y: 200,
@@ -37,7 +37,7 @@ const StartingStage = () => {
           scale: [1, 1.2, 0.8, 1.2, 1],
         }}
         transition={{
-          delay: 1,
+          delay: 2.5,
           scale: {
             repeat: Infinity,
             duration: 1,
@@ -53,14 +53,17 @@ const StartingStage = () => {
           ;(
             document.getElementById("play-click-audio") as HTMLAudioElement
           )?.play()
+          // setStore({
+          //   state: "playing",
+          //   cards: shuffleArray(
+          //     cards.map((card) => ({
+          //       ...card,
+          //       opened: false,
+          //     }))
+          //   ),
+          // })
           setStore({
-            state: "playing",
-            cards: shuffleArray(
-              cards.map((card) => ({
-                ...card,
-                opened: false,
-              }))
-            ),
+            state: "transform-to-playing",
           })
         }}
       >

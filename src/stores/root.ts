@@ -2,7 +2,13 @@ import { CARDS } from "@/constants/cards"
 import { create } from "zustand"
 
 type Store = {
-  state: "idle" | "playing" | "started" | "win" | "gameOver"
+  state:
+    | "idle"
+    | "transform-to-playing"
+    | "playing"
+    | "started"
+    | "win"
+    | "gameOver"
   cards: {
     id: number
     opened: boolean

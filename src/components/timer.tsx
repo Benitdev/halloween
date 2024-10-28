@@ -37,7 +37,7 @@ export const Timer = () => {
         duration: 2,
         type: "spring",
       }}
-      className="fixed top-[1.25rem] left-[2rem] flex items-center gap-3 w-[160px] h-[65px] justify-center pt-2"
+      className="fixed top-[1.25rem] left-[2rem] flex items-center gap-3 w-[160px] h-[65px] justify-center pt-2 font-mono"
       style={{
         backgroundImage: "url(/images/time-bg.png)",
         backgroundSize: "cover",
