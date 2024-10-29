@@ -38,10 +38,41 @@ export default function Home() {
     }
   }, [state])
 
+  useEffect(() => {
+    const img = document.querySelector(".background-image")
+    const fixedPoint: HTMLDivElement | null =
+      document.querySelector(".fixed-point")
+
+    const aspectRatio = 2
+
+    function updateFixedPosition() {
+      if (!img || !fixedPoint) return
+
+      const containerRect = img.parentElement?.getBoundingClientRect()
+      const imgRect = img.getBoundingClientRect()
+
+      if (!containerRect) return
+
+      const aspectRatioRendered = imgRect.width / imgRect.height
+      console.log(aspectRatioRendered)
+
+      fixedPoint.style.top = `clamp(0px,${
+        14 * (aspectRatio / aspectRatioRendered)
+      }%, 150px)`
+    }
+
+    updateFixedPosition()
+
+    window.addEventListener("resize", updateFixedPosition)
+    return () => {
+      window.removeEventListener("resize", updateFixedPosition)
+    }
+  }, [])
+
   return (
     <BackgroundBeamsWithCollision>
       <motion.div
-        className="absolute inset-0"
+        className="absolute inset-0 background-image"
         animate={{
           scale:
             state === "transform-to-playing" || state === "playing"
@@ -111,14 +142,17 @@ export default function Home() {
       <main className="relative h-screen flex flex-col overflow-hidden items-center w-full">
         {(state === "idle" || state === "transform-to-playing") && (
           <motion.div
-            className="fixed top-[11%]"
+            className="fixed fixed-point"
             initial={{
-              y: -300,
+              y: -400,
+              rotate: -30,
+              transformOrigin: "top right",
             }}
             animate={{
-              y: state === "idle" ? 0 : 1000,
-              rotate: [45, 90, 180, 360],
+              y: 0,
+              rotate: state === "transform-to-playing" ? -30 : 0,
               opacity: 1,
+              x: state === "transform-to-playing" ? 1500 : 0,
             }}
             transition={{
               duration: 1,
@@ -126,7 +160,11 @@ export default function Home() {
               rotate: {
                 type: "spring",
                 duration: 1,
-                delay: 4,
+                delay: state === "transform-to-playing" ? 0.3 : 4,
+              },
+              x: {
+                duration: 0.8,
+                delay: 1,
               },
             }}
           >
