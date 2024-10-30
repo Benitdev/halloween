@@ -168,7 +168,7 @@ export default function Home() {
               },
             }}
           >
-            <Image src={"/images/logo-2.svg"} alt="" width={250} height={100} />
+            <Image src={"/images/logo-2.svg"} alt="" width={200} height={100} />
           </motion.div>
         )}
         <motion.div

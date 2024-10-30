@@ -3,7 +3,7 @@ import Image from "next/image"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 
-const TIME_OUT = 40
+const TIME_OUT = 42
 
 export const Timer = () => {
   const { state, setStore } = useStore()
