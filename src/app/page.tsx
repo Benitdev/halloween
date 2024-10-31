@@ -220,6 +220,18 @@ export default function Home() {
         ></source>
       </audio>
       <Audio />
+
+      {cards.map((card) => (
+        <div key={card.id} className="hidden">
+          <Image
+            className="h-full"
+            src={card.imageUrl}
+            alt=""
+            width={200}
+            height={200}
+          />
+        </div>
+      ))}
     </BackgroundBeamsWithCollision>
   )
 }

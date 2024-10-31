@@ -1,7 +1,7 @@
 import { useStore } from "@/stores/root"
 import Image from "next/image"
 import { memo, useEffect, useState } from "react"
-import { motion } from "framer-motion"
+import { AnimatePresence, motion } from "framer-motion"
 import { Timer } from "@/components/timer"
 import { GameOver } from "@/components/game-over"
 import { GameWin } from "@/components/game-win"
@@ -103,15 +103,32 @@ export const PlayingStage = memo(() => {
                 height={50}
               />
             </div>
-            <div className="flip-card-back bg-[#fff]/40 backdrop-blur-sm rounded-md border-orange-500 border-[3px]">
-              <Image
-                className="h-full"
-                src={card.imageUrl}
-                alt=""
-                width={200}
-                height={200}
-              />
-            </div>
+            <AnimatePresence>
+              {card.opened && (
+                <motion.div
+                  className="flip-card-back bg-[#fff]/40 backdrop-blur-sm rounded-md border-orange-500 border-[3px]"
+                  initial={{
+                    opacity: 1,
+                  }}
+                  exit={{
+                    opacity: 0,
+                  }}
+                  transition={{
+                    exit: {
+                      delay: 0.1,
+                    },
+                  }}
+                >
+                  <Image
+                    className="h-full"
+                    src={card.imageUrl}
+                    alt=""
+                    width={200}
+                    height={200}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </motion.div>
       ))}
