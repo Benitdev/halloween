@@ -1,7 +1,10 @@
 import localFont from "next/font/local"
 import { Eater } from "next/font/google"
 import AnimatedCursor from "react-animated-cursor"
+import { Rubik_Burned } from "next/font/google"
+
 import "./globals.css"
+import "./seminar.css"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,6 +22,12 @@ const eater = Eater({
   weight: "400",
 })
 
+const fontHeading = Rubik_Burned({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-heading",
+})
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -27,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${eater.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${eater.variable} ${fontHeading.variable} antialiased`}
       >
         {children}
         <AnimatedCursor
