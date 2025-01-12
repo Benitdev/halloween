@@ -1,12 +1,13 @@
-"use client";
+"use client"
 
-import { motion } from "framer-motion";
-import Image from "next/image";
+import { motion } from "framer-motion"
+import Image from "next/image"
 
 export default function Header() {
   return (
-    <header className="fixed left-0 top-0 z-[99] flex w-full items-center justify-between p-4 md:px-7">
+    <header className="fixed left-0 top-0 z-[99] flex w-full items-center justify-between md:px-5">
       <motion.div
+        layoutId="header-logo"
         initial={{
           y: -30,
           x: -50,
@@ -31,6 +32,7 @@ export default function Header() {
       </motion.div>
 
       <motion.div
+        layoutId="header-slogan"
         initial={{
           y: -30,
           x: 50,
@@ -44,11 +46,13 @@ export default function Header() {
         transition={{
           duration: 1,
         }}
-        className="heading-animation relative z-20 select-none text-center text-base font-bold uppercase text-white md:text-2xl lg:text-3xl"
+        className="heading-animation relative z-20 select-none text-center text-base font-bold uppercase text-white md:text-2xl lg:text-4xl font-hongKy2"
       >
-        <h2 className="tracking-widest">Year End Party</h2>
-        <h2 className="absolute inset-0 tracking-widest">Year End Party</h2>
+        <h2 className="tracking-widest">Year End Party 2024</h2>
+        <h2 className="absolute inset-0 tracking-widest">
+          Year End Party 2024
+        </h2>
       </motion.div>
     </header>
-  );
+  )
 }

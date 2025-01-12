@@ -14,6 +14,8 @@ const config: Config = {
       },
       fontFamily: {
         eater: "var(--font-eater)",
+        gesco: "var(--font-gesco)",
+        hongKy2: "var(--font-hongKy2)",
         heading: ["var(--font-heading)"],
       },
       animation: {

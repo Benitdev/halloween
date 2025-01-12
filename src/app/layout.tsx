@@ -1,6 +1,5 @@
 import localFont from "next/font/local"
 import { Eater } from "next/font/google"
-import AnimatedCursor from "react-animated-cursor"
 import { Rubik_Burned } from "next/font/google"
 
 import "./globals.css"
@@ -16,6 +15,19 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
 })
+
+const gesco = localFont({
+  src: "./fonts/Gesco.ttf",
+  variable: "--font-gesco",
+  weight: "100 900",
+})
+
+const hongKy2 = localFont({
+  src: "./fonts/HONG KY 2.ttf",
+  variable: "--font-hongKy2",
+  weight: "100 900",
+})
+
 const eater = Eater({
   subsets: ["latin"],
   variable: "--font-eater",
@@ -36,10 +48,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${eater.variable} ${fontHeading.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${eater.variable} ${fontHeading.variable} ${gesco.variable} ${hongKy2.variable} antialiased`}
       >
         {children}
-        <AnimatedCursor
+        {/* <AnimatedCursor
           innerSize={36}
           outerSize={0}
           color="transparent"
@@ -63,7 +75,7 @@ export default function RootLayout({
             backgroundImage: `url(/images/pointer.png)`,
             backgroundSize: "cover",
           }}
-        />
+        /> */}
       </body>
     </html>
   )
