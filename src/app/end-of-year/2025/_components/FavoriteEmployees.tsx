@@ -27,50 +27,102 @@ export const FavoriteEmployees = () => {
 
   useEffect(() => {
     if (!resultStage) return
+    const delay = resultStage >= 3 ? 100 : 800
+    let step = 0
     const interval = setInterval(() => {
+      step++
       setRandomProgress((prevState) =>
         prevState.map((employee, i) => {
+          if (i === 13 && resultStage >= 3) {
+            return {
+              ...employee,
+              currentProgress: Math.min(
+                employee.maxProgress,
+                employee.currentProgress + Math.random()
+              ),
+            }
+          }
+          if (i === 14 && resultStage >= 3 && step % 8) {
+            return {
+              ...employee,
+              currentProgress: Math.min(
+                employee.maxProgress,
+                employee.currentProgress + Math.random()
+              ),
+            }
+          }
+
+          const isTopEmployee = [13, 14].includes(i)
+
           const shouldIncrease =
-            Math.random() >
-            (employee.maxProgress > 20
-              ? 0.2
-              : 1 - (employee.maxProgress + 20) / 100)
-          if (shouldIncrease || employee.maxProgress > 25)
+            isTopEmployee ||
+            Math.random() > (employee.maxProgress > 5 ? 0.3 : 0.5)
+
+          if (isTopEmployee && step < 10 && shouldIncrease && resultStage === 1)
+            return {
+              ...employee,
+              currentProgress: Math.min(
+                employee.maxProgress,
+                employee.currentProgress + Math.random() / 10
+              ),
+            }
+
+          // if (isTopEmployee && (step + i) % 2 === 0) {
+          //   return {
+          //     ...employee,
+          //     currentProgress: Math.min(
+          //       employee.maxProgress,
+          //       employee.currentProgress +
+          //         (Math.random() * (isTopEmployee ? 0.3 : 1) +
+          //           (isTopEmployee ? 1.3 : 0))
+          //     ),
+          //   }
+          // }
+          if (shouldIncrease)
             return {
               ...employee,
               currentProgress: Math.min(
                 employee.maxProgress,
                 employee.currentProgress +
-                  (prevState[3].currentProgress > 25 && i === 4
-                    ? Math.random() * 10
-                    : Math.random()) /
-                    (employee.maxProgress > 25 ? 2 : 1)
+                  (Math.random() * (isTopEmployee ? 0.5 : 1) +
+                    (isTopEmployee ? 0.5 : 0))
               ),
             }
           return employee
         })
       )
-    }, 300)
+    }, delay)
 
     return () => clearInterval(interval)
   }, [resultStage])
 
   useEffect(() => {
     if (
-      randomProgress.filter((employee) => employee.currentProgress > 17)
-        .length >= 2
-    )
-      setResultStage(2)
-    if (
       randomProgress.every(
         (employee) => employee.currentProgress === employee.maxProgress
       )
-    )
+    ) {
+      setResultStage(4)
+      return
+    }
+
+    if (randomProgress[14].currentProgress > 23) {
       setResultStage(3)
+      return
+    }
+
+    if (
+      randomProgress.filter((employee) => employee.currentProgress > 17)
+        .length >= 2
+    ) {
+      setResultStage(2)
+      return
+    }
   }, [randomProgress])
 
   const isShowOnlyTwo = resultStage >= 2
-  const isShowWinner = resultStage >= 3
+  const isSpeedUp = resultStage === 3
+  const isShowWinner = resultStage >= 4
 
   const sortedEmployee = !isShowOnlyTwo
     ? randomProgress.toSorted((a, b) => b.currentProgress - a.currentProgress)
@@ -97,9 +149,9 @@ export const FavoriteEmployees = () => {
             layoutId={employee.avatar}
             key={employee.avatar}
             transition={{
-              duration: 0.5,
+              duration: 0.8,
               y: {
-                delay: 1 + index * 0.5,
+                delay: 1 + index * 0.1,
                 duration: 0.5,
               },
             }}
@@ -114,7 +166,7 @@ export const FavoriteEmployees = () => {
                   ? 1.2
                   : 1,
             }}
-            className={cn("flex items-center font-sans relative", {
+            className={cn("flex items-center font-sans relative z-10", {
               "flex-col": isShowOnlyTwo,
             })}
           >
@@ -122,7 +174,6 @@ export const FavoriteEmployees = () => {
               {!isShowOnlyTwo && (
                 <span className="w-7 text-xl font-bold italic tracking-wider text-[#ffe2ac] text-right mr-3">
                   {index + 1}
-                  {"."}
                 </span>
               )}
               <div
@@ -145,17 +196,17 @@ export const FavoriteEmployees = () => {
                 {isShowWinner &&
                   employee.avatar === "/images/end-of-year-2025/Top1.jpg" && (
                     <motion.div
-                      className="absolute left-0 top-0 flex items-center gap-2 text-xl font-bold tracking-wider text-[#fcb65a] border border-[#db6b21] bg-black/60 p-2"
+                      className="absolute left-0 top-0 flex items-center gap-2 text-xl font-bold tracking-wider text-[#f87224] border border-[#db6b21] bg-black/60 p-2 px-5 brightness-150"
                       initial={{
                         opacity: 0,
-                        rotate: -45,
+                        rotate: -35,
                         x: 600,
                         y: -600,
                       }}
                       animate={{
                         opacity: 1,
-                        x: 10,
-                        y: 50,
+                        x: 60,
+                        y: 120,
                         scale: [1, 1.5, 1.2],
                       }}
                       transition={{
@@ -165,12 +216,6 @@ export const FavoriteEmployees = () => {
                       }}
                     >
                       <p>WINNER</p>
-                      <Image
-                        src={"/images/end-of-year-2025/award.png"}
-                        width={30}
-                        height={30}
-                        alt="cup"
-                      />
                     </motion.div>
                   )}
               </div>
@@ -180,14 +225,14 @@ export const FavoriteEmployees = () => {
                 <div className="h-full">
                   <div className="progress-infinite absolute bottom-0 left-0 right-0 h-full">
                     <div
-                      className="progress-bar3 flex items-center justify-center"
+                      className="progress-bar3 flex items-center justify-center backdrop-blur-[3px]"
                       style={{
                         width: `calc(${employee.currentProgress}% * 1.7 + 195px)`,
                       }}
                     >
                       <motion.p
                         className={cn(
-                          "text-base font-bold italic tracking-wider text-[#ffe2ac]"
+                          "text-base font-bold italic tracking-wider text-[#f87224] brightness-200"
                         )}
                       >
                         {employee.name}
@@ -203,8 +248,7 @@ export const FavoriteEmployees = () => {
                     "absolute text-xl font-bold italic tracking-wider text-[#ffe2ac]"
                   )}
                 >
-                  {/* {employee.name} */}
-                  <span className="ml-3 text-base font-bold italic tracking-wider text-[#f87224]">
+                  <span className="ml-3 text-base font-bold italic tracking-wider text-[#f87224] brightness-150">
                     {employee.currentProgress === 0
                       ? 0
                       : employee.currentProgress.toFixed(2)}
@@ -214,10 +258,22 @@ export const FavoriteEmployees = () => {
               </div>
             ) : (
               <div>
-                <motion.p className="text-center text-2xl font-bold italic tracking-wider text-[#ffe2ac]">
+                <motion.p className="text-center text-2xl font-bold italic tracking-wider text-[#f87224] brightness-200">
                   {employee.name}
                 </motion.p>
-                <motion.p className="text-center text-3xl font-bold italic tracking-wider text-[#f87224]">
+                <motion.p
+                  animate={{
+                    scale:
+                      isSpeedUp &&
+                      employee.avatar === "/images/end-of-year-2025/Top1.jpg"
+                        ? [1.2, 1, 1.3, 1, 1.2]
+                        : 1,
+                  }}
+                  transition={{
+                    repeat: Infinity,
+                  }}
+                  className="text-center text-3xl font-bold italic tracking-wider text-[#f87224] brightness-150"
+                >
                   {employee.currentProgress.toFixed(2)}%
                 </motion.p>
               </div>

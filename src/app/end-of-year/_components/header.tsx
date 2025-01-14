@@ -44,7 +44,7 @@ export default function Header() {
           opacity: 1,
         }}
         transition={{
-          duration: 1,
+          duration: 2,
         }}
         className="heading-animation relative z-20 select-none text-center text-base font-bold uppercase text-white md:text-2xl lg:text-4xl font-hongKy2"
       >

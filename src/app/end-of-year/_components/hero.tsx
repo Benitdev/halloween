@@ -18,13 +18,14 @@ export function Hero({ headingContent, isShowParticles = true }: Props) {
       layoutId="hero"
       className={cn("relative pt-[5rem]", {
         "pt-0": state !== "idle",
-        "cursor-pointer": state === "idle",
+        "cursor-pointer": state === "idle" || state === "started",
       })}
-      onClick={() =>
+      onClick={() => {
+        if (state === "playing") return
         setStore({
-          state: "started",
+          state: state === "idle" ? "started" : "playing",
         })
-      }
+      }}
       transition={{
         duration: 1,
       }}
