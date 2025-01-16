@@ -56,14 +56,19 @@ export const FavoriteEmployees = () => {
 
           const shouldIncrease =
             isTopEmployee ||
-            Math.random() > (employee.maxProgress > 5 ? 0.3 : 0.5)
+            Math.random() >
+              (employee.maxProgress > 5
+                ? 0.3
+                : employee.maxProgress === 1.64
+                ? 0.1
+                : 0.5)
 
           if (isTopEmployee && step < 10 && shouldIncrease && resultStage === 1)
             return {
               ...employee,
               currentProgress: Math.min(
                 employee.maxProgress,
-                employee.currentProgress + Math.random() / 10
+                employee.currentProgress + Math.random() / 13
               ),
             }
 
@@ -84,7 +89,12 @@ export const FavoriteEmployees = () => {
               currentProgress: Math.min(
                 employee.maxProgress,
                 employee.currentProgress +
-                  (Math.random() * (isTopEmployee ? 0.5 : 1) +
+                  (Math.random() *
+                    (isTopEmployee
+                      ? 0.5
+                      : employee.maxProgress === 1.64
+                      ? 1 / 10
+                      : 1) +
                     (isTopEmployee ? 0.5 : 0))
               ),
             }
@@ -205,8 +215,8 @@ export const FavoriteEmployees = () => {
                       }}
                       animate={{
                         opacity: 1,
-                        x: 60,
-                        y: 120,
+                        x: 30,
+                        y: 60,
                         scale: [1, 1.5, 1.2],
                       }}
                       transition={{
