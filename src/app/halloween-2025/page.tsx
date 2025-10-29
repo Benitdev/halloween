@@ -34,6 +34,9 @@ export default function Halloween2025Page() {
   const [bursts, setBursts] = useState<{ id: number; x: number; y: number }[]>(
     []
   )
+  const lastClickTime = useRef(0)
+  const clickCount = useRef(0)
+  const suspectedCheatromes = useRef(0)
 
   // Spawn logic
   useEffect(() => {
@@ -84,6 +87,9 @@ export default function Halloween2025Page() {
     setRemaining(GAME_DURATION_SECONDS)
     setSpiders([])
     setBursts([])
+    lastClickTime.current = 0
+    clickCount.current = 0
+    suspectedCheatromes.current = 0
     try {
       document
         .getElementById("play-click-audio")
@@ -93,13 +99,31 @@ export default function Halloween2025Page() {
 
   const handleCollect = (id: number) => {
     const target = spiders.find((s) => s.id === id)
-    if (target) {
-      const burstId = Date.now() + Math.floor(Math.random() * 1000)
-      setBursts((b) => [...b, { id: burstId, x: target.x!, y: target.y! }])
-      setTimeout(() => {
-        setBursts((b) => b.filter((bb) => bb.id !== burstId))
-      }, 450)
+    if (!target) return
+
+    // Anti-cheat: timestamp check
+    const now = Date.now()
+    const timeSinceLastClick = now - lastClickTime.current
+    lastClickTime.current = now
+
+    // Anti-cheat: debounce rapid clicks (< 50ms is suspicious)
+    if (timeSinceLastClick < 50) {
+      suspectedCheatromes.current++
+      if (suspectedCheatromes.current >= 3) {
+        console.warn("Suspicious activity detected. Game ended.")
+        setEnded(true)
+        return
+      }
+      return
     }
+
+    clickCount.current++
+    const burstId = Date.now() + Math.floor(Math.random() * 1000)
+    setBursts((b) => [...b, { id: burstId, x: target.x!, y: target.y! }])
+    setTimeout(() => {
+      setBursts((b) => b.filter((bb) => bb.id !== burstId))
+    }, 450)
+
     setSpiders((prev) => prev.filter((s) => s.id !== id))
     setFoundCount((c) => {
       const next = c + 1
