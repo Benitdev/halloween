@@ -18,8 +18,8 @@ type Spider = {
 
 const GAME_DURATION_SECONDS = 5 * 60 // 5 minutes
 const TARGET_SPIDERS = 200
-const MAX_CONCURRENT_SPIDERS = 5
-const SPAWN_INTERVAL_MS = 1200
+const MAX_CONCURRENT_SPIDERS = 10
+const SPAWN_INTERVAL_MS = 500
 const DESPAWN_MIN_MS = 3000
 const DESPAWN_MAX_MS = 6000
 
@@ -77,7 +77,10 @@ export default function Halloween2025Page() {
         setSpiders((prev) => prev.filter((s) => s.id !== id))
       }, ttl)
     }, SPAWN_INTERVAL_MS)
-    return () => clearInterval(interval)
+
+    return () => {
+      clearInterval(interval)
+    }
   }, [started, ended])
 
   // Timer
@@ -188,7 +191,7 @@ export default function Halloween2025Page() {
           </div>
         </main>
       ) : (
-        <main className="relative z-10 min-h-screen w-full flex flex-col items-center justify-center text-white">
+        <main className="relative z-10 min-h-screen w-full flex flex-col items-center justify-center text-white select-none">
           {/* Header */}
 
           <motion.div
