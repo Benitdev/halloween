@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useAnimation } from "framer-motion"
 import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision"
 import { Spotlight } from "@/components/ui/sportlight"
 import CongratulationParticles from "@/components/ui/CongratulationParticles"
@@ -23,6 +23,12 @@ const SPAWN_INTERVAL_MS = 500
 const DESPAWN_MIN_MS = 3000
 const DESPAWN_MAX_MS = 6000
 
+// Helper function to generate deterministic pseudo-random values based on ID
+const seededRandom = (seed: number) => {
+  const x = Math.sin(seed) * 10000
+  return x - Math.floor(x)
+}
+
 export default function Halloween2025Page() {
   const [started, setStarted] = useState(false)
   const [remaining, setRemaining] = useState(GAME_DURATION_SECONDS)
@@ -38,6 +44,55 @@ export default function Halloween2025Page() {
   const clickCount = useRef(0)
   const suspectedCheatromes = useRef(0)
   const [alreadyPlayed, setAlreadyPlayed] = useState(false)
+
+  const controlsSmall = useAnimation()
+  const controlsMedium = useAnimation()
+  const controlsLarge = useAnimation()
+
+  const resetPositions = async () => {
+    await Promise.all([
+      controlsSmall.start({ y: 0, transition: { duration: 0.6 } }),
+      controlsMedium.start({ y: 0, transition: { duration: 0.6 } }),
+      controlsLarge.start({ y: 0, transition: { duration: 0.6 } }),
+    ])
+  }
+
+  const animateClimb = async () => {
+    // Medium climbs onto small
+    await controlsMedium.start({
+      y: 0,
+      transition: { type: "spring", stiffness: 200, damping: 12 },
+    })
+
+    // Small climbs to join on top (optional)
+    await controlsSmall.start({
+      y: [0, -80, -100, -120, -140],
+      x: [0, -100, -120, -140, -160],
+      transition: {
+        type: "spring",
+        stiffness: 200,
+        damping: 12,
+        delay: 3,
+        duration: 1,
+        repeat: Infinity,
+      },
+    })
+
+    // Large climbs onto medium
+    await controlsLarge.start({
+      y: -300,
+      x: -350,
+      transition: { type: "spring", stiffness: 200, damping: 12, delay: 4 },
+    })
+
+    // Pause for a bit, then reset
+    setTimeout(() => resetPositions(), 1500)
+  }
+
+  useEffect(() => {
+    // Start climbing when the game starts
+    animateClimb()
+  }, [])
 
   // Mark as played when game ends
   useEffect(() => {
@@ -62,7 +117,7 @@ export default function Halloween2025Page() {
       const id = Date.now() + Math.floor(Math.random() * 1000)
       const x = 5 + Math.random() * 90
       const y = 10 + Math.random() * 80
-      const size = 18 + Math.round(Math.random() * 16) // smaller for difficulty
+      const size = 18 + Math.round(Math.random() * 20) // smaller for difficulty
       const rotate = -15 + Math.random() * 30
       const wobbleOffset = Math.random() * 1.2
 
@@ -178,6 +233,108 @@ export default function Halloween2025Page() {
       {/* Vignette overlay */}
       <div className="pointer-events-none fixed inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/70" />
       {/* Spotlight accent */}
+      <motion.div
+        className="absolute left-[2%] bottom-0"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{
+          opacity: [0.5, 0.8, 0.5],
+          y: [0, -15, 0],
+          x: [0, -5, 5, 0],
+        }}
+        transition={{
+          opacity: {
+            duration: 3,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+          y: {
+            duration: 4,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+          x: {
+            duration: 5,
+            repeat: Infinity,
+            ease: "easeInOut",
+          },
+        }}
+      >
+        <Image
+          src={"/images/Ghost 1.png"}
+          alt="ghost"
+          width={100}
+          height={100}
+          className="opacity-70"
+        />
+      </motion.div>
+      <motion.div
+        className="absolute right-[2%] bottom-0"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{
+          opacity: [0.5, 0.8, 0.5],
+          y: [0, -15, 0],
+          x: [0, 5, -5, 0],
+        }}
+        transition={{
+          opacity: {
+            duration: 3.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.5,
+          },
+          y: {
+            duration: 4.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.3,
+          },
+          x: {
+            duration: 5.5,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 0.7,
+          },
+        }}
+      >
+        <Image
+          src={"/images/Ghost 2.png"}
+          alt="ghost"
+          width={100}
+          height={100}
+          className="opacity-70"
+        />
+      </motion.div>
+
+      <div className="absolute left-[30%] bottom-0 flex justify-center items-end ">
+        <motion.div animate={controlsMedium}>
+          <Image
+            src={"/images/Small pumpkin.png"}
+            alt="pumpkin"
+            width={200}
+            height={200}
+            className=" opacity-70"
+          />
+        </motion.div>
+        <motion.div initial={{ y: 0, x: 0 }} animate={controlsSmall}>
+          <Image
+            src={"/images/Medium pumpkin.png"}
+            alt="pumpkin"
+            width={200}
+            height={200}
+            className=" opacity-70"
+          />
+        </motion.div>
+        <motion.div animate={controlsLarge}>
+          <Image
+            src={"/images/Large pumpkin.png"}
+            alt="pumpkin"
+            width={200}
+            height={200}
+            className=" opacity-70"
+          />
+        </motion.div>
+      </div>
+
       <Spotlight className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" />
       {alreadyPlayed ? (
         <main className="min-h-screen flex items-center justify-center">
@@ -217,7 +374,7 @@ export default function Halloween2025Page() {
             }}
           >
             <Image
-              src={"/images/game-logo.svg"}
+              src={"/images/halloween-text.png"}
               alt=""
               width={600}
               height={200}
@@ -285,7 +442,6 @@ export default function Halloween2025Page() {
                 y: 50,
                 opacity: 1,
                 scale: [1, 1.2, 0.8, 1.2, 1],
-                x: 20,
               }}
               transition={{
                 delay: 2.5,
@@ -359,37 +515,80 @@ export default function Halloween2025Page() {
           {/* Spiders Layer */}
           <div className="pointer-events-none fixed inset-0">
             <AnimatePresence>
-              {spiders.map((s) => (
-                <motion.button
-                  key={s.id}
-                  initial={{
-                    scale: 0,
-                    rotate: (s.rotate ?? 0) - 10,
-                    opacity: 0,
-                  }}
-                  animate={{
-                    scale: 1,
-                    rotate: s.rotate ?? 0,
-                    opacity: 1,
-                    y: [0, -10, 0, 10, 0],
-                  }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 300,
-                    damping: 20,
-                    duration: 2.4 + (s.wobbleOffset ?? 0),
-                  }}
-                  exit={{ scale: 0, opacity: 0 }}
-                  whileHover={{ scale: 1.15, rotate: (s.rotate ?? 0) + 5 }}
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => handleCollect(s.id)}
-                  className="absolute pointer-events-auto cursor-pointer drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]"
-                  style={{ left: `${s.x}%`, top: `${s.y}%` }}
-                >
-                  <span className="sr-only">Spider</span>
-                  <span style={{ fontSize: s.size ?? 32 }}>🕷️</span>
-                </motion.button>
-              ))}
+              {spiders.map((s) => {
+                // Generate deterministic movement pattern for each spider based on ID
+                const rand1 = seededRandom(s.id)
+                const rand2 = seededRandom(s.id * 2)
+                const rand3 = seededRandom(s.id * 3)
+
+                const moveDistance = 30 + rand1 * 40 // 20-50px movement
+                const moveDirection = rand2 > 0.5 ? 1 : -1
+                const crawlSpeed = 3 + rand3 * 2 // 3-5 seconds per cycle
+
+                return (
+                  <motion.button
+                    key={s.id}
+                    initial={{
+                      scale: 0,
+                      rotate: (s.rotate ?? 0) - 10,
+                      opacity: 0,
+                      x: 0,
+                    }}
+                    animate={{
+                      scale: 1,
+                      rotate: [
+                        s.rotate ?? 0,
+                        (s.rotate ?? 0) + moveDirection * 5,
+                        s.rotate ?? 0,
+                      ],
+                      opacity: 1,
+                      // Vertical wobble (crawling movement)
+                      y: [0, -8, 0, 8, 0],
+                      // Horizontal crawling movement
+                      x: [
+                        0,
+                        moveDirection * moveDistance,
+                        -moveDirection * moveDistance * 0.5,
+                        moveDirection * moveDistance,
+                        0,
+                      ],
+                    }}
+                    transition={{
+                      type: "spring",
+                      stiffness: 200,
+                      damping: 15,
+                      duration: crawlSpeed + (s.wobbleOffset ?? 0),
+                      x: {
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        duration: crawlSpeed + (s.wobbleOffset ?? 0),
+                        ease: "easeInOut",
+                      },
+                      y: {
+                        repeat: Infinity,
+                        repeatType: "loop",
+                        duration: 1.5 + (s.wobbleOffset ?? 0) * 0.5,
+                        ease: "easeInOut",
+                      },
+                      rotate: {
+                        repeat: Infinity,
+                        repeatType: "reverse",
+                        duration: crawlSpeed * 0.8 + (s.wobbleOffset ?? 0),
+                        ease: "easeInOut",
+                      },
+                    }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1.15, rotate: (s.rotate ?? 0) + 5 }}
+                    whileTap={{ scale: 0.9 }}
+                    onClick={() => handleCollect(s.id)}
+                    className="absolute pointer-events-auto cursor-pointer drop-shadow-[0_2px_6px_rgba(0,0,0,0.6)]"
+                    style={{ left: `${s.x}%`, top: `${s.y}%` }}
+                  >
+                    <span className="sr-only">Spider</span>
+                    <span style={{ fontSize: s.size ?? 32 }}>🕷️</span>
+                  </motion.button>
+                )
+              })}
             </AnimatePresence>
             {/* Click bursts */}
             <AnimatePresence>
