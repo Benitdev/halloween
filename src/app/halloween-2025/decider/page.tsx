@@ -32,7 +32,7 @@ type Burst = {
   spawnTime: number
 }
 
-const GAME_DURATION_SECONDS = 5 * 60 // 5 minutes
+const GAME_DURATION_SECONDS = 1 * 60 // 5 minutes
 const TARGET_SPIDERS = 2000
 const MAX_CONCURRENT_SPIDERS = 10
 const SPAWN_INTERVAL_MS = 500
