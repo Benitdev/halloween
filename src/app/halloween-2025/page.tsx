@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
-import { motion, AnimatePresence, useAnimation } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 import { BackgroundBeamsWithCollision } from "@/components/ui/background-beams-with-collision"
 import { Spotlight } from "@/components/ui/sportlight"
 import CongratulationParticles from "@/components/ui/CongratulationParticles"
