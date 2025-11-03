@@ -45,55 +45,6 @@ export default function Halloween2025Page() {
   const suspectedCheatromes = useRef(0)
   const [alreadyPlayed, setAlreadyPlayed] = useState(false)
 
-  const controlsSmall = useAnimation()
-  const controlsMedium = useAnimation()
-  const controlsLarge = useAnimation()
-
-  const resetPositions = async () => {
-    await Promise.all([
-      controlsSmall.start({ y: 0, transition: { duration: 0.6 } }),
-      controlsMedium.start({ y: 0, transition: { duration: 0.6 } }),
-      controlsLarge.start({ y: 0, transition: { duration: 0.6 } }),
-    ])
-  }
-
-  const animateClimb = async () => {
-    // Medium climbs onto small
-    await controlsMedium.start({
-      y: 0,
-      transition: { type: "spring", stiffness: 200, damping: 12 },
-    })
-
-    // Small climbs to join on top (optional)
-    await controlsSmall.start({
-      y: [0, -80, -100, -120, -140],
-      x: [0, -100, -120, -140, -160],
-      transition: {
-        type: "spring",
-        stiffness: 200,
-        damping: 12,
-        delay: 3,
-        duration: 1,
-        repeat: Infinity,
-      },
-    })
-
-    // Large climbs onto medium
-    await controlsLarge.start({
-      y: -300,
-      x: -350,
-      transition: { type: "spring", stiffness: 200, damping: 12, delay: 4 },
-    })
-
-    // Pause for a bit, then reset
-    setTimeout(() => resetPositions(), 1500)
-  }
-
-  useEffect(() => {
-    // Start climbing when the game starts
-    animateClimb()
-  }, [])
-
   // Mark as played when game ends
   useEffect(() => {
     if (!ended) return
@@ -117,7 +68,7 @@ export default function Halloween2025Page() {
       const id = Date.now() + Math.floor(Math.random() * 1000)
       const x = 5 + Math.random() * 90
       const y = 10 + Math.random() * 80
-      const size = 18 + Math.round(Math.random() * 20) // smaller for difficulty
+      const size = 18 + Math.round(Math.random() * 18) // smaller for difficulty
       const rotate = -15 + Math.random() * 30
       const wobbleOffset = Math.random() * 1.2
 
@@ -305,32 +256,181 @@ export default function Halloween2025Page() {
         />
       </motion.div>
 
-      <div className="absolute left-[30%] bottom-0 flex justify-center items-end ">
-        <motion.div animate={controlsMedium}>
+      {/* Pumpkins Stacking Animation */}
+      <div className="absolute left-[20%] bottom-0 flex justify-center items-end">
+        {/* Small Pumpkin - Base (stays at bottom) */}
+        <motion.div
+          style={{ transformOrigin: "center bottom" }}
+          initial={{ x: 0, y: 0, rotate: 0, scale: 1 }}
+          animate={
+            started
+              ? { x: 0, y: 0, rotate: 0, scale: 1 }
+              : {
+                  // Small pumpkin stays mostly still, slight bounce when others jump on
+                  y: [0, 0, -3, -3, -3, 0],
+                  scale: [1, 1, 1.01, 1.01, 1.01, 1],
+                }
+          }
+          transition={
+            started
+              ? { duration: 0.5, ease: "easeOut" }
+              : {
+                  duration: 6,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  times: [0, 0.25, 0.35, 0.65, 0.85, 1],
+                  ease: "easeInOut",
+                }
+          }
+        >
           <Image
             src={"/images/Small pumpkin.png"}
             alt="pumpkin"
             width={200}
             height={200}
-            className=" opacity-70"
+            className="opacity-50"
           />
         </motion.div>
-        <motion.div initial={{ y: 0, x: 0 }} animate={controlsSmall}>
+
+        {/* Medium Pumpkin - Jumps onto small */}
+        <motion.div
+          style={{ transformOrigin: "center bottom" }}
+          initial={{ x: 100, y: 0, rotate: 0, scale: 1 }}
+          animate={
+            started
+              ? { x: 100, y: 0, rotate: 0, scale: 1 }
+              : {
+                  // Sequence: stay → jump to small → stay stacked → jump back
+                  x: [100, 0, -180, -180, -50, 100],
+                  y: [
+                    0,
+                    0, // Initial position
+                    -160, // Jump up and onto small
+                    -140, // Stay on top of small
+                    -140, // Still stacked
+                    0, // Jump back down
+                  ],
+                  rotate: [5, 0, -2, 0, 15, 0],
+                  scale: [1, 1, 1.05, 1, 1.05, 1],
+                }
+          }
+          transition={
+            started
+              ? { duration: 0.5, ease: "easeOut" }
+              : {
+                  duration: 6,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  times: [0, 0.15, 0.25, 0.7, 0.85, 1],
+                  ease: [
+                    "linear",
+                    "easeOut",
+                    "easeInOut",
+                    "linear",
+                    "easeIn",
+                    "easeOut",
+                  ],
+                  x: {
+                    duration: 6,
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    times: [0, 0.15, 0.25, 0.7, 0.85, 1],
+                  },
+                  y: {
+                    duration: 6,
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    times: [0, 0.15, 0.25, 0.7, 0.85, 1],
+                    ease: [
+                      "linear",
+                      "linear",
+                      "easeOut",
+                      "linear",
+                      "easeIn",
+                      "easeOut",
+                    ],
+                  },
+                }
+          }
+        >
           <Image
             src={"/images/Medium pumpkin.png"}
             alt="pumpkin"
             width={200}
             height={200}
-            className=" opacity-70"
+            className="opacity-50"
           />
         </motion.div>
-        <motion.div animate={controlsLarge}>
+
+        {/* Large Pumpkin - Jumps onto medium */}
+        <motion.div
+          style={{ transformOrigin: "center bottom" }}
+          initial={{ x: 450, y: 0, rotate: 0, scale: 1 }}
+          animate={
+            started
+              ? { x: 450, y: 0, rotate: 0, scale: 1 }
+              : {
+                  // Sequence: stay → move x while medium jumps → jump onto medium → stay → jump back
+                  x: [450, 0, 0, -350, -350, 450],
+                  y: [
+                    0,
+                    0, // Wait while medium jumps first (stay at ground)
+                    -400, // Jump onto medium (which is already on small at y=-200)
+                    -350, // Stay stacked
+                    -350, // Still stacked
+                    0, // Jump back down
+                  ],
+                  rotate: [0, 0, 0, -8, 0, 8, 0],
+                  scale: [1, 1, 1, 1.06, 1, 1.06, 1],
+                }
+          }
+          transition={
+            started
+              ? { duration: 0.5, ease: "easeOut" }
+              : {
+                  duration: 6,
+                  repeat: Infinity,
+                  repeatType: "loop",
+                  times: [0, 0.25, 0.35, 0.55, 0.65, 0.85, 1],
+                  ease: [
+                    "linear",
+                    "linear",
+                    "easeOut",
+                    "easeInOut",
+                    "linear",
+                    "easeIn",
+                    "easeOut",
+                  ],
+                  x: {
+                    duration: 6,
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    times: [0, 0.25, 0.35, 0.55, 0.65, 0.85, 1],
+                  },
+                  y: {
+                    duration: 6,
+                    repeat: Infinity,
+                    repeatType: "loop",
+                    times: [0, 0.25, 0.35, 0.55, 0.65, 0.85, 1],
+                    ease: [
+                      "linear",
+                      "linear",
+                      "easeOut",
+                      "easeInOut",
+                      "linear",
+                      "easeIn",
+                      "easeOut",
+                    ],
+                  },
+                }
+          }
+        >
           <Image
             src={"/images/Large pumpkin.png"}
             alt="pumpkin"
             width={200}
             height={200}
-            className=" opacity-70"
+            className="opacity-50"
           />
         </motion.div>
       </div>
@@ -352,7 +452,6 @@ export default function Halloween2025Page() {
           {/* Header */}
 
           <motion.div
-            className="mt-4"
             initial={{
               opacity: 0,
               scale: 0,
@@ -378,7 +477,7 @@ export default function Halloween2025Page() {
               alt=""
               width={600}
               height={200}
-              className="mx-auto"
+              className="mx-auto pointer-events-none"
             />
             <div className="text-center opacity-90 mt-10">
               <div
@@ -453,7 +552,7 @@ export default function Halloween2025Page() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleStart}
-              className="relative z-50 flex items-center justify-center w-[400px] h-[150px] select-none mt-6 drop-shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
+              className="relative z-50 flex items-center justify-center w-[400px] h-[150px] select-none mt-4 drop-shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
               style={{
                 backgroundImage: "url(/images/button-bg.png)",
                 backgroundSize: "cover",
@@ -543,7 +642,7 @@ export default function Halloween2025Page() {
                       ],
                       opacity: 1,
                       // Vertical wobble (crawling movement)
-                      y: [0, -8, 0, 8, 0],
+                      y: [0, -15, 0, 15, 0],
                       // Horizontal crawling movement
                       x: [
                         0,
