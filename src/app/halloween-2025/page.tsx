@@ -39,6 +39,10 @@ const SPAWN_INTERVAL_MS = 400
 const DESPAWN_MIN_MS = 3000
 const DESPAWN_MAX_MS = 6000
 
+// Game cutoff date: November 4, 2025 at 16:20 UTC+7
+// Convert to UTC: 2025-11-04T09:20:00Z (UTC+7 is 7 hours ahead, so 16:20 - 7 = 09:20 UTC)
+const GAME_CUTOFF_DATE = new Date("2025-11-04T09:21:00Z")
+
 // Helper function to generate deterministic pseudo-random values based on ID
 const seededRandom = (seed: number) => {
   const x = Math.sin(seed) * 10000
@@ -130,6 +134,7 @@ export default function Halloween2025Page() {
   const clickCount = useRef(0)
   const suspectedCheatromes = useRef(0)
   const [alreadyPlayed, setAlreadyPlayed] = useState(false)
+  const [isBlocked, setIsBlocked] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const animationFrameRef = useRef<number | null>(null)
   const actualScoreRef = useRef(0) // Store actual score in ref (harder to tamper)
@@ -142,18 +147,24 @@ export default function Halloween2025Page() {
     localStorage.setItem("halloween2025_played", "true")
   }, [ended, alreadyPlayed])
 
-  // Check if game has been played before
+  // Check if game has been played before and if game is blocked
   useEffect(() => {
     if (typeof window !== "undefined") {
       if (localStorage.getItem("halloween2025_played") === "true") {
         setAlreadyPlayed(true)
+      }
+
+      // Check if current time is after cutoff date
+      const now = new Date()
+      if (now > GAME_CUTOFF_DATE) {
+        setIsBlocked(true)
       }
     }
   }, [])
 
   // Spawn logic
   useEffect(() => {
-    if (!started || ended) return
+    if (!started || ended || isBlocked) return
 
     // Calculate max concurrent spiders and spawn interval based on remaining time
     const remainingMinutes = remaining / 60
@@ -441,6 +452,9 @@ export default function Halloween2025Page() {
   }, [ended, foundCount])
 
   const handleStart = () => {
+    // Prevent starting if game is blocked
+    if (isBlocked) return
+
     setStarted(true)
     setEnded(false)
     setWon(false)
@@ -796,7 +810,15 @@ export default function Halloween2025Page() {
       </div>
 
       <Spotlight className="left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-30" />
-      {alreadyPlayed ? (
+      {isBlocked ? (
+        <main className="min-h-screen flex items-center justify-center">
+          <div className="mx-4 w-full max-w-md rounded-2xl border border-white/15 bg-black/80 p-8 backdrop-blur-md text-center text-white">
+            <div className="text-3xl md:text-5xl font-extrabold mb-6 bg-gradient-to-r from-amber-300 via-orange-400 to-rose-400 bg-clip-text text-transparent">
+              Game Has Ended
+            </div>
+          </div>
+        </main>
+      ) : alreadyPlayed ? (
         <main className="min-h-screen flex items-center justify-center">
           <div className="mx-4 w-full max-w-md rounded-2xl border border-white/15 bg-black/80 p-8 backdrop-blur-md text-center text-white">
             <div className="text-3xl md:text-5xl font-extrabold mb-6 bg-gradient-to-r from-amber-300 via-orange-400 to-rose-400 bg-clip-text text-transparent">
