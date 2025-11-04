@@ -35,7 +35,7 @@ type Burst = {
 const GAME_DURATION_SECONDS = 1 * 60 // 5 minutes
 const TARGET_SPIDERS = 2000
 const MAX_CONCURRENT_SPIDERS = 10
-const SPAWN_INTERVAL_MS = 500
+const SPAWN_INTERVAL_MS = 400
 const DESPAWN_MIN_MS = 3000
 const DESPAWN_MAX_MS = 6000
 
@@ -132,6 +132,8 @@ export default function Halloween2025Page() {
   const [alreadyPlayed, setAlreadyPlayed] = useState(false)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const animationFrameRef = useRef<number | null>(null)
+  const actualScoreRef = useRef(0) // Store actual score in ref (harder to tamper)
+  const scoreDisplayRef = useRef<HTMLSpanElement | null>(null)
 
   // Mark as played when game ends
   useEffect(() => {
@@ -152,6 +154,20 @@ export default function Halloween2025Page() {
   // Spawn logic
   useEffect(() => {
     if (!started || ended) return
+
+    // Calculate max concurrent spiders and spawn interval based on remaining time
+    const remainingMinutes = remaining / 60
+    let maxSpiders = MAX_CONCURRENT_SPIDERS // Normal: 10 spiders
+    let spawnInterval = SPAWN_INTERVAL_MS // Normal: 500ms
+
+    if (remainingMinutes <= 1) {
+      maxSpiders = 25 // 1 minute or less: 20 spiders
+      spawnInterval = 100 // Spawn every 300ms
+    } else if (remainingMinutes <= 2) {
+      maxSpiders = 18 // 2 minutes or less: 15 spiders
+      spawnInterval = 200 // Spawn every 400ms
+    }
+
     const interval = setInterval(() => {
       const id = Date.now() + Math.floor(Math.random() * 1000)
       const x = 5 + Math.random() * 90
@@ -167,7 +183,8 @@ export default function Halloween2025Page() {
       const spawnTime = Date.now()
 
       setSpiders((prev) => {
-        if (prev.length >= MAX_CONCURRENT_SPIDERS) return prev
+        // Use dynamic max spiders based on remaining time
+        if (prev.length >= maxSpiders) return prev
         return [
           ...prev,
           {
@@ -192,12 +209,12 @@ export default function Halloween2025Page() {
       setTimeout(() => {
         setSpiders((prev) => prev.filter((s) => s.id !== id))
       }, ttl)
-    }, SPAWN_INTERVAL_MS)
+    }, spawnInterval)
 
     return () => {
       clearInterval(interval)
     }
-  }, [started, ended])
+  }, [started, ended, remaining])
 
   // Timer
   useEffect(() => {
@@ -223,6 +240,10 @@ export default function Halloween2025Page() {
     const ctx = canvas.getContext("2d")
     if (!ctx) return
 
+    // Enable hardware acceleration and optimize rendering
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = "high"
+
     const resizeCanvas = () => {
       canvas.width = window.innerWidth
       canvas.height = window.innerHeight
@@ -238,12 +259,15 @@ export default function Halloween2025Page() {
         return
       }
 
-      // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      // Clear canvas - use faster method when possible
+      if (canvas.width && canvas.height) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+      }
 
       const now = Date.now()
 
       // Draw spiders (read from state, don't update it)
+      // Batch similar operations to reduce state changes
       spiders.forEach((spider) => {
         const timeSinceSpawn = (now - spider.spawnTime) / 1000
         const { animX, animY, animRotate, animScale } =
@@ -260,33 +284,35 @@ export default function Halloween2025Page() {
         ctx.rotate((animRotate * Math.PI) / 180)
         ctx.scale(animScale, animScale)
 
-        // Draw spider emoji (we'll use text rendering)
-        ctx.font = `${size}px Arial`
+        // Set text properties once
         ctx.textAlign = "center"
         ctx.textBaseline = "middle"
+        ctx.font = `${size}px Arial`
 
-        // Queen spiders get a golden glow
+        // Optimized shadow rendering - only use shadow for regular spiders
+        // For queen spiders, use a simpler glow effect
         if (isQueen) {
-          ctx.shadowColor = "rgba(255, 215, 0, 0.8)"
-          ctx.shadowBlur = 12
-          ctx.shadowOffsetX = 0
-          ctx.shadowOffsetY = 0
-          // Draw glow effect
-          ctx.globalAlpha = 0.6
+          // Simplified golden glow - draw a semi-transparent yellow circle behind
+          ctx.fillStyle = "rgba(255, 215, 0, 0.1)"
+          ctx.beginPath()
+          ctx.arc(0, 0, size * 0.6, 0, Math.PI * 2)
+          ctx.fill()
+
+          // Main spider without expensive shadow
+          ctx.fillStyle = "#000"
           ctx.fillText("🕷️", 0, 0)
-          ctx.globalAlpha = 1.0
-        }
 
-        ctx.shadowColor = "rgba(0, 0, 0, 0.6)"
-        ctx.shadowBlur = 6
-        ctx.shadowOffsetX = 0
-        ctx.shadowOffsetY = 2
-        ctx.fillText("🕷️", 0, 0)
-
-        // Draw crown for queen spiders
-        if (isQueen) {
+          // Crown
           ctx.font = `${size * 0.4}px Arial`
           ctx.fillText("👑", 0, -size * 0.6)
+        } else {
+          // Regular spiders - minimal shadow for performance
+          ctx.shadowColor = "rgba(0, 0, 0, 0.4)"
+          ctx.shadowBlur = 4 // Reduced from 6
+          ctx.shadowOffsetX = 0
+          ctx.shadowOffsetY = 2
+          ctx.fillStyle = "#000"
+          ctx.fillText("🕷️", 0, 0)
         }
 
         ctx.restore()
@@ -344,11 +370,65 @@ export default function Halloween2025Page() {
     }
   }, [started, ended, spiders, bursts])
 
+  // Anti-tampering: Monitor score display and reset if DOM is edited
+  useEffect(() => {
+    if (!ended || !scoreDisplayRef.current) return
+
+    const checkScore = () => {
+      if (scoreDisplayRef.current) {
+        const displayedScore = parseInt(
+          scoreDisplayRef.current.textContent || "0",
+          10
+        )
+        const actualScore = actualScoreRef.current
+
+        // If DOM was edited, restore actual score
+        if (displayedScore !== actualScore) {
+          scoreDisplayRef.current.textContent = String(actualScore)
+          scoreDisplayRef.current.setAttribute(
+            "data-score",
+            String(actualScore)
+          )
+        }
+      }
+    }
+
+    // Check immediately and then periodically
+    checkScore()
+    const interval = setInterval(checkScore, 100) // Check every 100ms
+
+    // Use MutationObserver to detect DOM changes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.type === "childList" ||
+          mutation.type === "characterData"
+        ) {
+          checkScore()
+        }
+      })
+    })
+
+    if (scoreDisplayRef.current) {
+      observer.observe(scoreDisplayRef.current, {
+        childList: true,
+        characterData: true,
+        subtree: true,
+      })
+    }
+
+    return () => {
+      clearInterval(interval)
+      observer.disconnect()
+    }
+  }, [ended, foundCount])
+
   const handleStart = () => {
     setStarted(true)
     setEnded(false)
     setWon(false)
     setFoundCount(0)
+    actualScoreRef.current = 0
     setRemaining(GAME_DURATION_SECONDS)
     setSpiders([])
     setBursts([])
@@ -397,16 +477,19 @@ export default function Halloween2025Page() {
     ])
 
     setSpiders((prev) => prev.filter((s) => s.id !== id))
-    setFoundCount((c) => {
-      // Queen spiders are worth 3 points, regular spiders are worth 1 point
-      const points = target.isQueen ? 3 : 1
-      const next = c + points
-      if (next >= TARGET_SPIDERS && !ended) {
-        setWon(true)
-        setEnded(true)
-      }
-      return next
-    })
+
+    // Queen spiders are worth 3 points, regular spiders are worth 1 point
+    const points = target.isQueen ? 3 : 1
+    actualScoreRef.current += points
+    const newScore = actualScoreRef.current
+
+    setFoundCount(newScore)
+
+    // Check win condition
+    if (newScore >= TARGET_SPIDERS && !ended) {
+      setWon(true)
+      setEnded(true)
+    }
     // Play audio - handle promise and ensure reliable playback
     if (audioRef.current) {
       const audio = audioRef.current
@@ -937,8 +1020,14 @@ export default function Halloween2025Page() {
                 </div>
                 <div className="text-lg md:text-2xl mb-6 text-orange-100/90">
                   You found
-                  <span className="mx-2 px-2 py-0.5 rounded bg-orange-500/20 text-orange-200 font-bold">
-                    {foundCount}
+                  <span
+                    ref={scoreDisplayRef}
+                    className="mx-2 px-2 py-0.5 rounded bg-orange-500/20 text-orange-200 font-bold"
+                    data-score={actualScoreRef.current}
+                    suppressContentEditableWarning
+                    contentEditable={false}
+                  >
+                    {actualScoreRef.current}
                   </span>
                   {won ? " spiders!" : " spiders in 5 minutes."}
                 </div>
