@@ -161,10 +161,10 @@ export default function Halloween2025Page() {
     let spawnInterval = SPAWN_INTERVAL_MS // Normal: 500ms
 
     if (remainingMinutes <= 1) {
-      maxSpiders = 25 // 1 minute or less: 20 spiders
+      maxSpiders = 30 // 1 minute or less: 20 spiders
       spawnInterval = 100 // Spawn every 300ms
     } else if (remainingMinutes <= 2) {
-      maxSpiders = 18 // 2 minutes or less: 15 spiders
+      maxSpiders = 20 // 2 minutes or less: 15 spiders
       spawnInterval = 200 // Spawn every 400ms
     }
 
@@ -242,7 +242,11 @@ export default function Halloween2025Page() {
 
     // Enable hardware acceleration and optimize rendering
     ctx.imageSmoothingEnabled = true
-    ctx.imageSmoothingQuality = "high"
+    ctx.imageSmoothingQuality = "medium" // Medium quality for better performance
+
+    // Disable expensive features for better performance
+    ctx.shadowBlur = 0 // Disable shadows globally
+    ctx.shadowColor = "transparent"
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth
@@ -266,91 +270,104 @@ export default function Halloween2025Page() {
 
       const now = Date.now()
 
-      // Draw spiders (read from state, don't update it)
-      // Batch similar operations to reduce state changes
-      spiders.forEach((spider) => {
+      // Draw spiders - optimized single pass with batching
+      ctx.textAlign = "center"
+      ctx.textBaseline = "middle"
+
+      // Draw regular spiders first (no glow, faster) - single pass
+      ctx.fillStyle = "#000"
+      for (let i = 0; i < spiders.length; i++) {
+        const spider = spiders[i]
+        if (spider.isQueen) continue // Skip queens for now
+
         const timeSinceSpawn = (now - spider.spawnTime) / 1000
         const { animX, animY, animRotate, animScale } =
           calculateSpiderAnimation(spider, timeSinceSpawn)
 
-        // Draw spider
         const x = (spider.x / 100) * canvas.width + animX
         const y = (spider.y / 100) * canvas.height + animY
         const size = (spider.size || 32) * animScale
-        const isQueen = spider.isQueen ?? false
 
         ctx.save()
         ctx.translate(x, y)
         ctx.rotate((animRotate * Math.PI) / 180)
         ctx.scale(animScale, animScale)
-
-        // Set text properties once
-        ctx.textAlign = "center"
-        ctx.textBaseline = "middle"
         ctx.font = `${size}px Arial`
+        ctx.fillText("🕷️", 0, 0)
+        ctx.restore()
+      }
 
-        // Optimized shadow rendering - only use shadow for regular spiders
-        // For queen spiders, use a simpler glow effect
-        if (isQueen) {
-          // Simplified golden glow - draw a semi-transparent yellow circle behind
-          ctx.fillStyle = "rgba(255, 215, 0, 0.1)"
-          ctx.beginPath()
-          ctx.arc(0, 0, size * 0.6, 0, Math.PI * 2)
-          ctx.fill()
+      // Draw queen spiders (with glow) - single pass
+      for (let i = 0; i < spiders.length; i++) {
+        const spider = spiders[i]
+        if (!spider.isQueen) continue // Skip regular spiders
 
-          // Main spider without expensive shadow
-          ctx.fillStyle = "#000"
-          ctx.fillText("🕷️", 0, 0)
+        const timeSinceSpawn = (now - spider.spawnTime) / 1000
+        const { animX, animY, animRotate, animScale } =
+          calculateSpiderAnimation(spider, timeSinceSpawn)
 
-          // Crown
-          ctx.font = `${size * 0.4}px Arial`
-          ctx.fillText("👑", 0, -size * 0.6)
-        } else {
-          // Regular spiders - minimal shadow for performance
-          ctx.shadowColor = "rgba(0, 0, 0, 0.4)"
-          ctx.shadowBlur = 4 // Reduced from 6
-          ctx.shadowOffsetX = 0
-          ctx.shadowOffsetY = 2
-          ctx.fillStyle = "#000"
-          ctx.fillText("🕷️", 0, 0)
-        }
+        const x = (spider.x / 100) * canvas.width + animX
+        const y = (spider.y / 100) * canvas.height + animY
+        const size = (spider.size || 32) * animScale
+        const glowRadius = size * 0.6
+
+        ctx.save()
+        ctx.translate(x, y)
+
+        // Simplified glow
+        ctx.fillStyle = "rgba(255, 215, 0, 0.15)"
+        ctx.beginPath()
+        ctx.arc(0, 0, glowRadius, 0, Math.PI * 2)
+        ctx.fill()
+
+        // Rotate and scale for spider
+        ctx.rotate((animRotate * Math.PI) / 180)
+        ctx.scale(animScale, animScale)
+
+        // Main spider
+        ctx.fillStyle = "#000"
+        ctx.font = `${size}px Arial`
+        ctx.fillText("🕷️", 0, 0)
+
+        // Crown
+        ctx.font = `${size * 0.4}px Arial`
+        ctx.fillText("👑", 0, -size * 0.6)
 
         ctx.restore()
-      })
+      }
 
-      // Draw bursts
+      // Draw bursts - optimized batch rendering (minimal save/restore)
       const updatedBursts: Burst[] = []
-      bursts.forEach((burst) => {
-        const age = (now - burst.spawnTime) / 1000
-        const duration = 0.45
+      if (bursts.length > 0) {
+        ctx.lineWidth = 2
 
-        if (age < duration) {
-          const progress = age / duration
-          const scale = progress * 2.2
-          const opacity = 0.6 * (1 - progress)
+        bursts.forEach((burst) => {
+          const age = (now - burst.spawnTime) / 1000
+          const duration = 0.45
 
-          const x = (burst.x / 100) * canvas.width
-          const y = (burst.y / 100) * canvas.height
+          if (age < duration) {
+            const progress = age / duration
+            const scale = progress * 2.2
+            const opacity = 0.6 * (1 - progress)
 
-          ctx.save()
-          ctx.translate(x, y)
-          ctx.scale(scale, scale)
+            const x = (burst.x / 100) * canvas.width
+            const y = (burst.y / 100) * canvas.height
+            const radius = 12 * scale
 
-          ctx.strokeStyle = `rgba(255, 165, 0, ${opacity})`
-          ctx.lineWidth = 2
-          ctx.beginPath()
-          ctx.arc(0, 0, 12, 0, Math.PI * 2)
-          ctx.stroke()
+            // Use strokeStyle with opacity instead of globalAlpha for better performance
+            ctx.strokeStyle = `rgba(255, 165, 0, ${opacity})`
+            ctx.beginPath()
+            ctx.arc(x, y, radius, 0, Math.PI * 2)
+            ctx.stroke()
 
-          ctx.restore()
-
-          updatedBursts.push({
-            ...burst,
-            scale,
-            opacity,
-          })
-        }
-      })
+            updatedBursts.push({
+              ...burst,
+              scale,
+              opacity,
+            })
+          }
+        })
+      }
 
       // Clean up expired bursts
       if (updatedBursts.length !== bursts.length) {
@@ -818,13 +835,13 @@ export default function Halloween2025Page() {
             <Image
               src={"/images/halloween-text.png"}
               alt=""
-              width={600}
-              height={200}
+              width={500}
+              height={150}
               className="mx-auto pointer-events-none"
             />
             <div className="text-center opacity-90 mt-10">
               <div
-                className="text-5xl md:text-6xl font-extrabold tracking-[0.2em] uppercase bg-gradient-to-r from-orange-300 via-amber-200 to-rose-200 bg-clip-text text-transparent drop-shadow-[0_3px_12px_rgba(0,0,0,0.35)]"
+                className="text-2xl md:text-4xl font-extrabold tracking-[0.5em] uppercase bg-gradient-to-r from-orange-300 via-amber-200 to-rose-200 bg-clip-text text-transparent drop-shadow-[0_3px_12px_rgba(0,0,0,0.35)]"
                 style={{
                   textShadow:
                     "0 0 6px rgba(255,255,255,0.35), 0 1px 6px rgba(255,165,0,0.35)",
@@ -832,7 +849,7 @@ export default function Halloween2025Page() {
               >
                 Halloween Hunt 2025
               </div>
-              <div className="mt-3 text-xl md:text-3xl italic text-orange-100/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
+              <div className="mt-3 text-xl md:text-2xl italic text-orange-100/90 drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)]">
                 Find the hidden spiders across the haunted scene
               </div>
             </div>
@@ -895,7 +912,7 @@ export default function Halloween2025Page() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleStart}
-              className="relative z-50 flex items-center justify-center w-[400px] h-[150px] select-none mt-4 drop-shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
+              className="relative z-50 flex items-center justify-center w-[350px] h-[130px] select-none drop-shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
               style={{
                 backgroundImage: "url(/images/button-bg.png)",
                 backgroundSize: "cover",
