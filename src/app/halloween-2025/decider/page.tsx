@@ -575,7 +575,7 @@ export default function Halloween2025Page() {
           alt="ghost"
           width={100}
           height={100}
-          className="opacity-70"
+          className="opacity-70 pointer-events-none select-none"
         />
       </motion.div>
       <motion.div
@@ -612,12 +612,12 @@ export default function Halloween2025Page() {
           alt="ghost"
           width={100}
           height={100}
-          className="opacity-70"
+          className="opacity-70 pointer-events-none select-none"
         />
       </motion.div>
 
       {/* Pumpkins Stacking Animation */}
-      <div className="absolute left-[20%] bottom-0 flex justify-center items-end">
+      <div className="absolute left-[20%] bottom-0 flex justify-center items-end pointer-events-none select-none">
         {/* Small Pumpkin - Base (stays at bottom) */}
         <motion.div
           style={{ transformOrigin: "center bottom" }}
